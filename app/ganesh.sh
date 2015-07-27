@@ -73,9 +73,9 @@ route () {
     routes_action=( ${routes_action[@]} "$3" )
 }
 
-GET () { route "GET" $@ }
-POST () { route "POST" $@ }
-DELETE () { route "DELETE" $@ }
+get () { route "GET" $@ }
+post () { route "POST" $@ }
+delete () { route "DELETE" $@ }
 status () { response_status="$1" }
 
 header () {
