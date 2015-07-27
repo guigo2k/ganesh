@@ -9,7 +9,7 @@
                                 
 ```                                                  
 
-# A sinatra-like web application framework for Bash, with a CGI interface.
+### A sinatra-like web application framework for Bash, with a CGI interface.
 
 Example app:
 
