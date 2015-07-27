@@ -1,6 +1,6 @@
 . wwwoosh.sh
 
-ganesh_response="/tmp/ganesh_response"
+martin_response="/tmp/martin_response"
 
 routes_method=()
 routes_path=()
@@ -12,10 +12,21 @@ route () {
     routes_action=( ${routes_action[@]} "$3" )
 }
 
-GET    () { route "GET" $@ }
-POST   () { route "POST" $@ }
-DELETE () { route "DELETE" $@ }
-status () { response_status="$1" }
+get () {
+    route "GET" $@
+}
+
+post () {
+    route "POST" $@
+}
+
+delete () {
+    route "DELETE" $@
+}
+
+status () {
+    response_status="$1"
+}
 
 header () {
     head="$1: $2"
@@ -36,7 +47,7 @@ not_found () {
     fi
 }
 
-ganesh_dispatch () {
+martin_dispatch () {
     action=""
 
     for (( i = 0 ; i < ${#routes_method[@]} ; i++ )); do
@@ -56,13 +67,13 @@ ganesh_dispatch () {
     reset_response
 
     # execute the action, storing output in a temporary file
-    "$action" > "$ganesh_response"
+    "$action" > "$martin_response"
 
     # set status header, echo headers, blank line, then body
     header "Status" "$response_status"
     echo -e "$response_headers"
     echo ""
-    cat "$ganesh_response"
+    cat "$martin_response"
 }
 
 reset_response () {

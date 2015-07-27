@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 default_port="8080"
 http_version="HTTP/1.1"
@@ -65,28 +65,28 @@ function handle_response () {
     cat
 }
 
-# function wwwoosh_run () {
-#     app="$1"
-# 
-#     # TODO: is there a better way than a named pipe?
-#     rm -f "$wwwoosh_fifo"
-#     mkfifo "$wwwoosh_fifo"
-# 
-#     port="$default_port"
-#     [ $# -gt 1 ] && port="$2"
-# 
-#     debug=""
-#     [ $# -gt 2 ] && debug="$3"
-# 
-#     echo "Starting Wwwoosh on port $port..."
-# 
-#     while true; do
-# 
-#         if [ "$debug" ]; then
-#             nc -l $port < "$wwwoosh_fifo" | tee /dev/stderr | handle_request "$app" | handle_response | tee /dev/stderr > "$wwwoosh_fifo"
-#         else
-#             nc -l $port < "$wwwoosh_fifo" | handle_request "$app" | handle_response > "$wwwoosh_fifo"
-#         fi
-# 
-#     done
-# }
+function wwwoosh_run () {
+    app="$1"
+
+    # TODO: is there a better way than a named pipe?
+    rm -f "$wwwoosh_fifo"
+    mkfifo "$wwwoosh_fifo"
+
+    port="$default_port"
+    [ $# -gt 1 ] && port="$2"
+
+    debug=""
+    [ $# -gt 2 ] && debug="$3"
+
+    echo "Starting Wwwoosh on port $port..."
+
+    while true; do
+
+        if [ "$debug" ]; then
+            nc -l $port < "$wwwoosh_fifo" | tee /dev/stderr | handle_request "$app" | handle_response | tee /dev/stderr > "$wwwoosh_fifo"
+        else
+            nc -l $port < "$wwwoosh_fifo" | handle_request "$app" | handle_response > "$wwwoosh_fifo"
+        fi
+
+    done
+}

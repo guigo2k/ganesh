@@ -1,24 +1,24 @@
-# load framework
-. ganesh.sh
+#!/bin/bash
 
-# define handlers
-GET "/" ganesh_root
-ganesh_root () {
+. martin.sh
+
+get "/" root_handler
+root_handler () {
     header "Content-Type" "text/html"
     cat "index.html"
 }
 
-GET "/ps" ganesh_ps
-ganesh_ps () {
+get "/ps" ps_handler
+ps_handler () {
     header "Content-Type" "text/plain"
     ps aux
 }
 
-GET "/redirect" ganesh_redirect
-ganesh_redirect () {
+get "/redirect" redirect_handler
+redirect_handler () {
     status 302
     header "Location" "https://github.com/"
 }
 
-# run as CGI script
-ganesh_dispatch
+# run app 
+martin_dispatch
