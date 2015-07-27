@@ -9,4 +9,9 @@ RUN echo "http://nl.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories &
 
 EXPOSE 8080
 WORKDIR /app
-CMD uwsgi --ini /app/app.ini
+CMD uwsgi \
+    --http-socket :8080 \
+    --http-socket-modifier1 9 \
+    --plugin-dir /usr/lib/uwsgi \
+    --plugin cgi \
+    --cgi app.sh
