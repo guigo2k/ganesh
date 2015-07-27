@@ -1,21 +1,21 @@
-#!/bin/bash
-
+# load framework
 . ganesh.sh
 
-get "/" root_handler
-root_handler () {
+# define handlers
+get "/" gnsh_root
+gnsh_root () {
     header "Content-Type" "text/html"
     cat "index.html"
 }
 
-get "/ps" ps_handler
-ps_handler () {
+get "/ps" gnsh_ps
+gnsh_ps () {
     header "Content-Type" "text/plain"
     ps aux
 }
 
-get "/redirect" redirect_handler
-redirect_handler () {
+get "/redirect" gnsh_redirect
+gnsh_redirect () {
     status 302
     header "Location" "https://github.com/"
 }
