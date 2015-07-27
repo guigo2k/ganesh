@@ -1,14 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-default_port="8080"
 http_version="HTTP/1.1"
-wwwoosh_fifo="/tmp/wwwoosh_fifo"
+ganesh_response="/tmp/ganesh_response"
 
 CR='\r'
 LF='\n'
 CRLF="$CR$LF"
 
-function handle_request () {
+handle_request () {
     app="$1"
 
     # read the request line
@@ -37,7 +36,7 @@ function handle_request () {
     "$app"
 }
 
-function handle_response () {
+handle_response () {
     response_status="200 OK"
     response_headers=""
 
@@ -65,28 +64,81 @@ function handle_response () {
     cat
 }
 
-function wwwoosh_run () {
-    app="$1"
+routes_method=()
+routes_path=()
+routes_action=()
 
-    # TODO: is there a better way than a named pipe?
-    rm -f "$wwwoosh_fifo"
-    mkfifo "$wwwoosh_fifo"
+route () {
+    routes_method=( ${routes_method[@]} "$1" )
+    routes_path=( ${routes_path[@]} "$2" )
+    routes_action=( ${routes_action[@]} "$3" )
+}
 
-    port="$default_port"
-    [ $# -gt 1 ] && port="$2"
+get () {
+    route "GET" $@
+}
 
-    debug=""
-    [ $# -gt 2 ] && debug="$3"
+post () {
+    route "POST" $@
+}
 
-    echo "Starting Wwwoosh on port $port..."
+delete () {
+    route "DELETE" $@
+}
 
-    while true; do
+status () {
+    response_status="$1"
+}
 
-        if [ "$debug" ]; then
-            nc -l $port < "$wwwoosh_fifo" | tee /dev/stderr | handle_request "$app" | handle_response | tee /dev/stderr > "$wwwoosh_fifo"
-        else
-            nc -l $port < "$wwwoosh_fifo" | handle_request "$app" | handle_response > "$wwwoosh_fifo"
+header () {
+    head="$1: $2"
+    if [ "$response_headers" ]; then
+        response_headers="$response_headers\n$head"
+    else
+        response_headers="$head"
+    fi
+}
+
+not_found () {
+    status "404"
+    header "Content-type" "text/plain"
+    if [ $# -gt 0 ]; then
+        echo "$@"
+    else
+        echo "Not Found: $PATH_INFO"
+    fi
+}
+
+ganesh_dispatch () {
+    action=""
+
+    for (( i = 0 ; i < ${#routes_method[@]} ; i++ )); do
+        method=${routes_method[$i]}
+        path=${routes_path[$i]}
+        act=${routes_action[$i]}
+        if [ "$REQUEST_METHOD" = "$method" ]; then
+            if [ "$PATH_INFO" = "$path" ]; then
+                action="$act"
+                break
+            fi
         fi
-
     done
+
+    [ ! "$action" ] && action="not_found"
+
+    reset_response
+
+    # execute the action, storing output in a temporary file
+    "$action" > "$ganesh_response"
+
+    # set status header, echo headers, blank line, then body
+    header "Status" "$response_status"
+    echo -e "$response_headers"
+    echo ""
+    cat "$ganesh_response"
+}
+
+reset_response () {
+    response_status="200 OK"
+    response_headers=""
 }
