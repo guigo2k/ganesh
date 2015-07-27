@@ -16,5 +16,4 @@ CMD uwsgi \
     --http-socket-modifier1 9 \
     --plugin-dir /usr/lib/uwsgi \
     --plugin cgi \
-    --callable app \
     --cgi app.sh
