@@ -9,7 +9,7 @@
                                 
 ```                                                  
 
-### A sinatra-like web application framework for Bash, with a CGI interface.
+A sinatra-like web application micro-framework for bash with a CGI interface.
 
 Example app:
 
@@ -36,7 +36,7 @@ redirect_handler () {
     header "Location" "https://github.com/"
 }
 
-# run as CGI script
-ganesh_dispatch
+# run app
+ganesh_dance
     
 ```

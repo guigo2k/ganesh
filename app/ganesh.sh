@@ -109,7 +109,7 @@ not_found () {
     fi
 }
 
-ganesh_dispatch () {
+ganesh_dance () {
     action=""
 
     for (( i = 0 ; i < ${#routes_method[@]} ; i++ )); do

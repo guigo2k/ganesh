@@ -21,4 +21,4 @@ redirect_handler () {
 }
 
 # run app 
-ganesh_dispatch
+ganesh_dance
