@@ -21,4 +21,4 @@ redirect_handler () {
 }
 
 # run app 
-martin_dispatch
+ganesh_dispatch
