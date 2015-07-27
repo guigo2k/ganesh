@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+. wwwoosh.sh
 
 ganesh_response="/tmp/ganesh_response"
 
