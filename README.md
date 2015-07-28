@@ -11,13 +11,14 @@
 
 ## A sinatra-like web app framework for Bash
 
-Ganesh a is micro-framework for developing web applications using shell scripts. It builds on uWSGI and Docker for deploying self-contained apps into containers. 
+Ganesh a is micro-framework for developing web applications using shell scripts. It builds on the [uWSGI](https://github.com/unbit/uwsgi) application server container and [Docker](https://www.docker.com/) for deploying self-contained applications. 
 
 ### Quick start
 
 ```
-docker run -d -p 8080:8080 tropicloud/ganesh
+docker run -it -p 8080:8080 tropicloud/ganesh
 ```
+
 
 ### Example app
 
