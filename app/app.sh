@@ -4,20 +4,20 @@
 . ganesh.sh
 
 # define handlers
-get "/" gnsh_root
-gnsh_root () {
+get "/" my_index
+my_index () {
     header "Content-Type" "text/html"
     cat "index.html"
 }
 
-get "/ps" gnsh_ps
-gnsh_ps () {
+get "/ps" my_procs
+my_procs () {
     header "Content-Type" "text/plain"
     ps aux
 }
 
-get "/redirect" gnsh_redirect
-gnsh_redirect () {
+get "/redirect" my_redirect
+my_redirect() {
     status 302
     header "Location" "https://github.com/"
 }

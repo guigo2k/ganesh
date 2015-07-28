@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
-http_version="HTTP/1.1"
-ganesh_response="/tmp/ganesh_response"
-
 CR='\r'
 LF='\n'
 CRLF="$CR$LF"
+http_version="HTTP/1.1"
+ganesh_response="/tmp/ganesh_response"
 
 handle_request () {
     app="$1"
@@ -40,17 +39,15 @@ handle_response () {
     response_status="200 OK"
     response_headers=""
 
-    while read header && [ ! "$header" = "" ]; do
-        header_name="$(echo $header | cut -d ':' -f 1 | tr 'A-Z' 'a-z')"
-        if [ "$header_name" = "status" ]; then
-            response_status="$(echo $header | cut -d ':' -f 2 | sed 's/^ //')"
-        #elif [ "$header_name" = "content-type" ]; then
-        #elif [ "$header_name" = "location" ]; then
+    while read header && [ ! "$header" = "" ]
+    do header_name="$(echo $header | cut -d ':' -f 1 | tr 'A-Z' 'a-z')"
+        
+        if [ "$header_name" = "status" ]
+        then response_status="$(echo $header | cut -d ':' -f 2 | sed 's/^ //')"
         else
-            if [ "$response_headers" ]; then
-                response_headers="$response_headers$CRLF$header"
-            else
-                response_headers="$header"
+            if [ "$response_headers" ]
+            then response_headers="$response_headers$CRLF$header"
+            else response_headers="$header"
             fi
         fi
     done
@@ -64,9 +61,9 @@ handle_response () {
     cat
 }
 
-routes_method=()
 routes_path=()
 routes_action=()
+routes_method=()
 
 route () {
     routes_method=( ${routes_method[@]} "$1" )
@@ -74,49 +71,36 @@ route () {
     routes_action=( ${routes_action[@]} "$3" )
 }
 
-get () {
-    route "GET" $@
-}
-
-post () {
-    route "POST" $@
-}
-
-delete () {
-    route "DELETE" $@
-}
-
-status () {
-    response_status="$1"
-}
+get    () { route "GET" $@ }
+post   () { route "POST" $@ }
+delete () { route "DELETE" $@ }
+status () { response_status="$1" }
 
 header () {
     head="$1: $2"
-    if [ "$response_headers" ]; then
-        response_headers="$response_headers\n$head"
-    else
-        response_headers="$head"
+    if [ "$response_headers" ]
+    then response_headers="$response_headers\n$head"
+    else response_headers="$head"
     fi
 }
 
 not_found () {
     status "404"
     header "Content-type" "text/plain"
-    if [ $# -gt 0 ]; then
-        echo "$@"
-    else
-        echo "Not Found: $PATH_INFO"
+    if [ $# -gt 0 ]
+    then echo "$@"
+    else echo "Not Found: $PATH_INFO"
     fi
 }
 
 reset_response () {
-    response_status="200 OK"
-    response_headers=""
+	response_status="200 OK"
+	response_headers="" 
 }
 
 ganesh_dance () {
     action=""
-
+    
     for (( i = 0 ; i < ${#routes_method[@]} ; i++ )); do
         method=${routes_method[$i]}
         path=${routes_path[$i]}
@@ -128,7 +112,7 @@ ganesh_dance () {
             fi
         fi
     done
-
+    
     [ ! "$action" ] && action="not_found"
 
     reset_response
