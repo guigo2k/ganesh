@@ -1,7 +1,7 @@
 FROM alpine:3.2
 MAINTAINER admin@tropicloud.net
 
-ADD . /app
+ADD app /app
 RUN echo "http://nl.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
     apk --update add bash git curl uwsgi-cgi && \
     rm -rf /var/cache/apk/* && \
