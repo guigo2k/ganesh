@@ -1,23 +1,23 @@
 #!/bin/bash
 
-ganesh_response="/tmp/ganesh_response"
+martin_response="/tmp/martin_response"
 
 routes_method=()
 routes_path=()
 routes_action=()
 
-route() {
+route () {
     routes_method=( ${routes_method[@]} "$1" )
     routes_path=( ${routes_path[@]} "$2" )
     routes_action=( ${routes_action[@]} "$3" )
 }
 
-   get() { route "GET" $@ }
-  post() { route "POST" $@ }
-delete() { route "DELETE" $@ }
-status() { response_status="$1" }
+   get () { route "GET" $@ }
+  post () { route "POST" $@ }
+delete () { route "DELETE" $@ }
+status () { response_status="$1"}
 
-header() {
+header () {
     head="$1: $2"
     if [ "$response_headers" ]
     then response_headers="$response_headers\n$head"
@@ -25,7 +25,7 @@ header() {
     fi
 }
 
-not_found() {
+not_found () {
     status "404"
     header "Content-type" "text/plain"
     if [ $# -gt 0 ]
@@ -34,12 +34,12 @@ not_found() {
     fi
 }
 
-reset_response() {
+reset_response () {
     response_status="200 OK"
     response_headers=""
 }
 
-ganesh_dance() {
+martin_dispatch () {
     action=""
 
     for (( i = 0 ; i < ${#routes_method[@]} ; i++ )); do
@@ -59,11 +59,11 @@ ganesh_dance() {
     reset_response
 
     # execute the action, storing output in a temporary file
-    "$action" > "$ganesh_response"
+    "$action" > "$martin_response"
 
     # set status header, echo headers, blank line, then body
     header "Status" "$response_status"
-    header "Date: `date -u '+%a, %d %b %Y %R:%S GMT'`"
-    echo -e "$response_headers\n"
-    cat "$ganesh_response"
+    echo -e "$response_headers"
+    echo ""
+    cat "$martin_response"
 }
