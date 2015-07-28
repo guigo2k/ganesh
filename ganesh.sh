@@ -6,18 +6,18 @@ routes_method=()
 routes_path=()
 routes_action=()
 
-route () {
+route() {
     routes_method=( ${routes_method[@]} "$1" )
     routes_path=( ${routes_path[@]} "$2" )
     routes_action=( ${routes_action[@]} "$3" )
 }
 
-   get () { route "GET" $@; }
-  post () { route "POST" $@; }
-delete () { route "DELETE" $@; }
-status () { response_status="$1"; }
+   get() { route "GET" $@; }
+  post() { route "POST" $@; }
+delete() { route "DELETE" $@; }
+status() { response_status="$1"; }
 
-header () {
+header() {
     head="$1: $2"
     if [ "$response_headers" ]
     then response_headers="$response_headers\n$head"
@@ -25,7 +25,7 @@ header () {
     fi
 }
 
-not_found () {
+not_found() {
     status "404"
     header "Content-type" "text/plain"
     if [ $# -gt 0 ]
@@ -34,13 +34,13 @@ not_found () {
     fi
 }
 
-reset_response () {
+reset_response() {
 	response_date="`date -u '+%a, %d %b %Y %R:%S GMT'`"
     response_status="200 OK"
     response_headers=""
 }
 
-ganesh_dance () {
+ganesh_dance() {
     action=""
 
     for (( i = 0 ; i < ${#routes_method[@]} ; i++ )); do
