@@ -1,6 +1,6 @@
 #!/bin/bash
 
-martin_response="/tmp/martin_response"
+ganesh_response="/tmp/ganesh_response"
 
 routes_method=()
 routes_path=()
@@ -35,11 +35,12 @@ not_found () {
 }
 
 reset_response () {
+	response_date="`date -u '+%a, %d %b %Y %R:%S GMT'`"
     response_status="200 OK"
     response_headers=""
 }
 
-martin_dispatch () {
+ganesh_dance () {
     action=""
 
     for (( i = 0 ; i < ${#routes_method[@]} ; i++ )); do
@@ -57,13 +58,13 @@ martin_dispatch () {
     [ ! "$action" ] && action="not_found"
 
     reset_response
-
+	
     # execute the action, storing output in a temporary file
-    "$action" > "$martin_response"
+    "$action" > "$ganesh_response"
 
     # set status header, echo headers, blank line, then body
     header "Status" "$response_status"
-    echo -e "$response_headers"
-    echo ""
-    cat "$martin_response"
+    header "Date" "$response_date"
+    echo -e "$response_headers\n"
+    cat "$ganesh_response"
 }
