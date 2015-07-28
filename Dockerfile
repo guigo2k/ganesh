@@ -2,7 +2,7 @@ FROM alpine:3.2
 MAINTAINER admin@tropicloud.net
 
 ADD app /app
-RUN apk --update add bash nano curl uwsgi-cgi && \
+RUN apk --update add bash curl uwsgi-cgi && \
     rm -rf /var/cache/apk/* && \
     rm -rf /var/lib/apt/lists/* && \
     adduser -D -s /bin/bash ganesh ganesh
