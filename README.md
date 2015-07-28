@@ -11,7 +11,7 @@
 
 ## A sinatra-like web app framework for Bash
 
-Ganesh a is micro-framework for developing web apps using shell scripts. It builds on [uWSGI](https://github.com/unbit/uwsgi) application server container and [Docker](https://www.docker.com/) for deploying self-contained bash applications. 
+Ganesh a is micro-framework for developing web apps using shell scripts. It builds on [Docker](https://www.docker.com/) and [uWSGI](https://github.com/unbit/uwsgi) application server for deploying self-contained (unprivileged) bash applications. 
 
 ### Quick start
 
@@ -52,6 +52,6 @@ ganesh_dance
 
 ### Note
 
-By default, applications do not have access to the host system. You can --link your Ganesh app to other apps (containers) or --mount specific directories (volumes) from the host in order to accomplish specific server tasks.
+By default, applications do not have access to the host system. You can --link your Ganesh app to other containers or --mount specific directories (volumes) from the host in order to accomplish specific server tasks.
 
 For more information visit the [Docker Docs](https://docs.docker.com/).

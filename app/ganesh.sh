@@ -35,7 +35,7 @@ not_found() {
 }
 
 reset_response() {
-	response_date="`date -u '+%a, %d %b %Y %R:%S GMT'`"
+    response_date="`date -u '+%a, %d %b %Y %R:%S GMT'`"
     response_status="200 OK"
     response_headers=""
 }
