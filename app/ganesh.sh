@@ -12,10 +12,10 @@ route () {
     routes_action=( ${routes_action[@]} "$3" )
 }
 
-get () { route "GET" $@ }
-post () { route "POST" $@ }
-delete () { route "DELETE" $@ }
-status () { response_status="$1"}
+   get () { route "GET" $@; }
+  post () { route "POST" $@; }
+delete () { route "DELETE" $@; }
+status () { response_status="$1"; }
 
 header () {
     head="$1: $2"
