@@ -2,12 +2,10 @@ FROM alpine:3.2
 MAINTAINER admin@tropicloud.net
 
 ADD app /app
-RUN echo "http://nl.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
-    apk --update add bash git curl uwsgi-cgi && \
+RUN apk --update add bash nano curl uwsgi-cgi && \
     rm -rf /var/cache/apk/* && \
     rm -rf /var/lib/apt/lists/* && \
-    addgroup ganesh && \ 
-    adduser -D -G ganesh -s /bin/bash ganesh
+    adduser -D -s /bin/bash ganesh ganesh
 
 USER ganesh
 EXPOSE 8080
