@@ -15,7 +15,7 @@ route () {
    get () { route "GET" $@; }
   post () { route "POST" $@; }
 delete () { route "DELETE" $@; }
-status () { response_status="$1" }
+status () { response_status="$1"; }
 
 header () {
     head="$1: $2"
