@@ -7,9 +7,10 @@ get '/' && {
 	cat index.html
 }
 
-get '/ps' && {
+get '/*' && {
     header "Content-Type" "text/plain"
-	ps auxf
+	echo "PATH_INFO: $PATH_INFO"
+	echo "QUERY_STRING: $QUERY_STRING"
 }
 
 get '/say/*/to/*' && {
