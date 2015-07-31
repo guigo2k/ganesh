@@ -9,7 +9,7 @@ get "/" && {
 
 get "/say/*/to/*" && {
 	header "Content-Type" "text/plain"
-	echo Say ${uvi[0]} to ${uvi[1]}
+	echo Say ${url_param[0]} to ${url_param[1]}
 }
 
 get "/redirect" && {

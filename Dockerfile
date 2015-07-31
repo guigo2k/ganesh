@@ -5,10 +5,9 @@ RUN adduser -h /app -s /bin/bash -D ganesh ganesh
 ADD . /app
 RUN apk --update add bash curl uwsgi-cgi && \
     chown -R ganesh:ganesh /app
-
+    
+WORKDIR /app
 USER ganesh
-HOME /app
-
 EXPOSE 8080
 CMD uwsgi \
 --http-socket :8080 \

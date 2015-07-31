@@ -14,10 +14,10 @@ declare RESPONSE_CHARSET='utf-8'
 declare RESPONSE_STATUS='200 OK'
 declare RESPONSE_DATE="$(date -u '+%a, %d %b %Y %R:%S GMT')"
 
-declare -a uvi
 declare CR='\r'
 declare LF='\n'
 declare CRLF="$CR$LF"
+declare -a url_param
 
 # public functions
 # ---------------------------------------------------------------------------------
@@ -44,10 +44,10 @@ ganesh_route() {
     local re=$(ganesh_compile_path "$path")
     local -i i
 
-    uvi=()
+    url_param=()
     if [ "$REQUEST_METHOD" = "$verb" ] && [[ "$REQUEST_URI_PATH" =~ $re ]]; then
 		for ((i = 1; i < ${#BASH_REMATCH[@]}; i++)) {
-		    uvi[i - 1]=$(ganesh_unescape "${BASH_REMATCH[i]}")
+		    url_param[i - 1]=$(ganesh_unescape "${BASH_REMATCH[i]}")
 		}
 		routing_matched=true
 		return 0
