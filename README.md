@@ -9,9 +9,9 @@
                                   
 ```                                                  
 
-## A sinatra-like CGI framework for Bash
+## Sinatra-like CGI framework for Bash
 
-Ganesh is a (micro) web application framework for shell scripts. It builds on [Docker](https://www.docker.com/) and [uWSGI](https://github.com/unbit/uwsgi) application server for deploying self-contained (unprivileged) bash applications. 
+Ganesh is a (micro) web application framework written in bash. It builds on [Docker](https://www.docker.com/) and [uWSGI](https://github.com/unbit/uwsgi) application server for deploying self-contained, unprivileged bash applications. 
 
 ### Quick start
 
@@ -28,30 +28,30 @@ docker run -it -p 8080:8080 tropicloud/ganesh
 . ganesh.sh
 
 get '/' && {
-    header "Content-Type" "text/html"
+	header "Content-Type" "text/html"
 	cat index.html
 }
 
 get '/*' && {
-    header "Content-Type" "text/plain"
-	echo "PATH_INFO: $PATH_INFO"
-	echo "QUERY_STRING: $QUERY_STRING"
+	header "Content-Type" "text/plain"
+	echo "Path: $PATH_INFO"
+	echo "Query: $QUERY_STRING"
 }
 
 get '/say/*/to/*' && {
-    header "Content-Type" "text/plain"
+	header "Content-Type" "text/plain"
 	echo Say ${uri_var[0]} to ${uri_var[1]}
 }
 
 get "/redirect" && {
- 	status 302
-    header "Location" "https://github.com/"
+	status 302
+	header "Location" "https://github.com/"
 }
     
 ```
 
 ### Note
 
-By default, applications do not have access to the host system. You can --link your Ganesh app to other containers or --mount specific directories (volumes) from the host in order to accomplish specific server tasks.
+By default, applications do not have access to the host system. You can --link your app to other containers or mount specific directories from the host using Docker volumes.
 
 For more information visit the [Docker Docs](https://docs.docker.com/).
