@@ -16,13 +16,13 @@ Ganesh is a framework for writing micro-services using shell scripts. It builds 
 ### Quick start
 
 ```
-docker run -it -p 8080:8080 tropicloud/ganesh
+docker run -p 8080:8080 -it tropicloud/ganesh
 ```
 
-Now visit http://<your-ip-address>:8080/ or run the following in your terminal:
+Now visit http://localhost:8080/ or run the following in your terminal:
 
 ```
-curl -i -X POST "http://<your-ip-address>:8080/post/path?app=my-app" \
+curl -i -X POST "http://localhost:8080/post/path?app=my-app" \
 -H "Content-Type: application/json" \
 -d '{"name": "my-name", "age": "my-age"}'
 ```
