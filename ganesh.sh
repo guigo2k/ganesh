@@ -1,4 +1,5 @@
-# Sinatra-like CGI shell script framework.
+# Bin, Bash, Ganesh!
+# A Sinatra-like CGI framework for Bash.
 
 # private global variables
 # ---------------------------------------------------------------------------------
@@ -14,6 +15,9 @@ declare RESPONSE_STATUS='200 OK'
 declare RESPONSE_DATE="$(date -u '+%a, %d %b %Y %R:%S GMT')"
 
 declare -a uvi
+declare CR='\r'
+declare LF='\n'
+declare CRLF="$CR$LF"
 
 # public functions
 # ---------------------------------------------------------------------------------
@@ -21,11 +25,10 @@ declare -a uvi
    get() { ganesh_route GET "$1"; }
   post() { ganesh_route POST "$1"; }
 delete() { ganesh_route DELETE "$1"; }
-
 status() { RESPONSE_STATUS=$*; }
 header() { head="$1: $2"
     if [ "$response_headers" ]
-    then response_headers="$response_headers\n$head"
+    then response_headers="$response_headers$LF$head"
     else response_headers="$head"
     fi
 }
@@ -44,7 +47,7 @@ ganesh_route() {
     uvi=()
     if [ "$REQUEST_METHOD" = "$verb" ] && [[ "$REQUEST_URI_PATH" =~ $re ]]; then
 		for ((i = 1; i < ${#BASH_REMATCH[@]}; i++)) {
-		    uvi[i - 1]=$(uri_unescape "${BASH_REMATCH[i]}")
+		    uvi[i - 1]=$(ganesh_unescape "${BASH_REMATCH[i]}")
 		}
 		routing_matched=true
 		return 0
@@ -83,25 +86,23 @@ ganesh_extract_params() {
 	if [[ "$p" == *=* ]]; then
 	    var=${p%%=*}
 	    val=${p#*=}
-	    eval "params_${var#:}='$(uri_unescape $val)'"
+	    eval "params_${var#:}='$(ganesh_unescape $val)'"
 	fi
     done
 }
 
-new_line() { echo -ne '\r\n'; }
-
-uri_unescape() {
+ganesh_unescape() {
     local str=$1
     str=${str//+/ }
     str=${str//%/\\x}
     echo -e "$str"
 }
 
-not_found() {
+ganesh_not_found() {
 	header "Status" "404 Not Found"
 	header "Content-Type" "text/plain"
 	header "Date" "$RESPONSE_DATE"
-	echo -e "$response_headers\r\n"
+	echo -e "$response_headers$CRLF"
 	echo -e "404 Not Found"
 }
 
@@ -109,11 +110,11 @@ ganesh_send_response() {
 if [ -n "$routing_matched" ]; then
 	header "Status" "$RESPONSE_STATUS"
 	header "Date" "$RESPONSE_DATE"
-	echo -e "$response_headers\r\n"
+	echo -e "$response_headers$CRLF"
 	while read -r line
 	do echo "$line"
 	done < $ganesh_tmpfile
-else not_found
+else ganesh_not_found
 fi >&5 # 5 is a copy of stdout
 }
 
