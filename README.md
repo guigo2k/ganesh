@@ -9,9 +9,9 @@
                                   
 ```                                                  
 
-## A sinatra-like web app framework for Bash
+## A sinatra-like CGI framework for Bash
 
-Ganesh a is micro-framework for developing web apps using shell scripts. It builds on [Docker](https://www.docker.com/) and [uWSGI](https://github.com/unbit/uwsgi) application server for deploying self-contained (unprivileged) bash applications. 
+Ganesh is a micro-framework for writing apps using shell scripts. It builds on [Docker](https://www.docker.com/) and [uWSGI](https://github.com/unbit/uwsgi) application server for deploying self-contained (unprivileged) bash applications. 
 
 ### Quick start
 
@@ -27,26 +27,25 @@ docker run -it -p 8080:8080 tropicloud/ganesh
 
 . ganesh.sh
 
-get "/" app_index
-app_index() {
+get '/' && {
     header "Content-Type" "text/html"
-    cat "index.html"
+	cat index.html
 }
 
-get "/ps" app_proc
-app_proc() {
+get '/ps' && {
     header "Content-Type" "text/plain"
-    ps aux
+	ps auxf
 }
 
-get "/redirect" app_redirect
-app_redirect() {
-    status 302
+get "/redirect" && {
+ 	status 302
     header "Location" "https://github.com/"
 }
 
-# that's all
-ganesh_dance
+get '/say/*/to/*' && {
+    header "Content-Type" "text/plain"
+	echo Say ${uri_var[0]} to ${uri_var[1]}
+}
     
 ```
 

@@ -2,23 +2,22 @@
 
 . ganesh.sh
 
-get "/" app_index
-app_index() {
+get '/' && {
     header "Content-Type" "text/html"
-    cat "index.html"
+	cat index.html
 }
 
-get "/ps" app_proc
-app_proc() {
+get '/ps' && {
     header "Content-Type" "text/plain"
-    ps aux
+	ps auxf
 }
 
-get "/redirect" app_redirect
-app_redirect() {
-    status 302
+get "/redirect" && {
+ 	status 302
     header "Location" "https://github.com/"
 }
 
-# that's all
-ganesh_dance
+get '/say/*/to/*' && {
+    header "Content-Type" "text/plain"
+	echo Say ${uri_var[0]} to ${uri_var[1]}
+}
