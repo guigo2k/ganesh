@@ -12,12 +12,12 @@ get '/ps' && {
 	ps auxf
 }
 
-get "/redirect" && {
- 	status 302
-    header "Location" "https://github.com/"
-}
-
 get '/say/*/to/*' && {
     header "Content-Type" "text/plain"
 	echo Say ${uri_var[0]} to ${uri_var[1]}
+}
+
+get "/redirect" && {
+ 	status 302
+    header "Location" "https://github.com/"
 }
