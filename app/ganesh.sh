@@ -13,10 +13,7 @@ declare RESPONSE_CHARSET='utf-8'
 declare RESPONSE_STATUS='200 OK'
 declare RESPONSE_DATE="$(date -u '+%a, %d %b %Y %R:%S GMT')"
 
-# public global variables
-# ---------------------------------------------------------------------------------
-
-declare -a uri_var
+declare -a uva
 
 # public functions
 # ---------------------------------------------------------------------------------
@@ -44,10 +41,10 @@ ganesh_route() {
     local re=$(ganesh_compile_path "$path")
     local -i i
 
-    uri_var=()
+    uva=()
     if [ "$REQUEST_METHOD" = "$verb" ] && [[ "$REQUEST_URI_PATH" =~ $re ]]; then
 		for ((i = 1; i < ${#BASH_REMATCH[@]}; i++)) {
-		    uri_var[i - 1]=$(uri_unescape "${BASH_REMATCH[i]}")
+		    uva[i - 1]=$(uri_unescape "${BASH_REMATCH[i]}")
 		}
 		routing_matched=true
 		return 0

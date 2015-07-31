@@ -9,9 +9,9 @@
                                   
 ```                                                  
 
-## Sinatra-like CGI framework for Bash
+## A Sinatra-like CGI framework for Bash
 
-Ganesh is a (micro) web application framework written in bash. It builds on [Docker](https://www.docker.com/) and [uWSGI](https://github.com/unbit/uwsgi) application server for deploying self-contained, unprivileged bash applications. 
+Ganesh is a framework for writing micro-services using shell scripts. It builds on [Docker](https://www.docker.com/) and [uWSGI](https://github.com/unbit/uwsgi) application server for deploying self-contained, unprivileged bash applications. 
 
 ### Quick start
 
@@ -32,7 +32,7 @@ get '/' && {
 	cat index.html
 }
 
-get '/*' && {
+get '/path/*' && {
 	header "Content-Type" "text/plain"
 	echo "Path: $PATH_INFO"
 	echo "Query: $QUERY_STRING"
@@ -40,7 +40,7 @@ get '/*' && {
 
 get '/say/*/to/*' && {
 	header "Content-Type" "text/plain"
-	echo Say ${uri_var[0]} to ${uri_var[1]}
+	echo Say ${uva[0]} to ${uva[1]}
 }
 
 get "/redirect" && {
@@ -52,6 +52,6 @@ get "/redirect" && {
 
 ### Note
 
-By default, applications do not have access to the host system. You can --link your app to other containers or mount specific directories from the host using Docker volumes.
+By default, applications do not have access to the host system. You can --link your app to other containers or mount specific directories from your host system using Docker volumes.
 
 For more information visit the [Docker Docs](https://docs.docker.com/).

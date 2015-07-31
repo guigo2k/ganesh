@@ -7,7 +7,7 @@ get '/' && {
 	cat index.html
 }
 
-get '/*' && {
+get '/path/*' && {
 	header "Content-Type" "text/plain"
 	echo "Path: $PATH_INFO"
 	echo "Query: $QUERY_STRING"
@@ -15,7 +15,7 @@ get '/*' && {
 
 get '/say/*/to/*' && {
 	header "Content-Type" "text/plain"
-	echo Say ${uri_var[0]} to ${uri_var[1]}
+	echo Say ${uva[0]} to ${uva[1]}
 }
 
 get "/redirect" && {
