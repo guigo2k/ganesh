@@ -1,13 +1,11 @@
 FROM alpine:3.2
 MAINTAINER admin@tropicloud.net
 
-ADD app /app
-RUN apk --update add bash curl nano uwsgi-cgi && \
-    rm -rf /var/cache/apk/* /var/lib/apt/lists/* && \
-    adduser -D -s /bin/bash ganesh ganesh
+RUN apk --update add bash uwsgi-cgi && \
+    adduser -h /app -s /bin/bash -D ganesh ganesh
 
 USER ganesh
-EXPOSE 8080
+ADD . /app
 WORKDIR /app
 CMD uwsgi \
 --http-socket :8080 \
