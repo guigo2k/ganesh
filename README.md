@@ -19,6 +19,13 @@ Ganesh is a framework for writing micro-services using shell scripts. It builds 
 docker run -it -p 8080:8080 tropicloud/ganesh
 ```
 
+Now visit http://<your-ip-address>:8080/ or run the following in your terminal:
+
+```
+curl -i -X POST "http://<your-ip-address>:8080/post/path?app=my-app" \
+-H "Content-Type: application/json" \
+-d '{"name": "my-name", "age": "my-age"}'
+```
 
 ### Example app
 
@@ -32,27 +39,28 @@ get '/' && {
 	cat index.html
 }
 
-get '/path/*' && {
-	header "Content-Type" "text/plain"
-	echo "Path: $PATH_INFO"
-	echo "Query: $QUERY_STRING"
-}
-
 get '/say/*/to/*' && {
 	header "Content-Type" "text/plain"
-	echo Say ${uva[0]} to ${uva[1]}
+	echo Say ${uvi[0]} to ${uvi[1]}
 }
 
 get "/redirect" && {
 	status 302
 	header "Location" "https://github.com/"
 }
+
+post '/post/*' && {
+	header "Content-Type" "text/plain"
+	echo "Path: $PATH_INFO"
+	echo "Query: $QUERY_STRING"
+	echo "Data: $POST_DATA"
+}
     
 ```
 
 ### Notes
 
-Nginx natively supports upstream servers speaking the uwsgi protocol. See [uWSGI docs](http://uwsgi-docs.readthedocs.org/en/latest/Nginx.html).
+Nginx natively supports upstream servers speaking the uwsgi protocol. See the [uWSGI docs](http://uwsgi-docs.readthedocs.org/en/latest/Nginx.html).
 
 By default, applications do not have access to the host system. You can --link your app to other containers or mount specific directories from your host  using Docker volumes.
 

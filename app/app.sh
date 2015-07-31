@@ -2,23 +2,26 @@
 
 . ganesh.sh
 
-get '/' && {
+GET "/" && {
 	header "Content-Type" "text/html"
 	cat index.html
 }
 
-get '/path/*' && {
+GET "/say/*/to/*" && {
 	header "Content-Type" "text/plain"
-	echo "Path: $PATH_INFO"
-	echo "Query: $QUERY_STRING"
+	echo Say ${uvi[0]} to ${uvi[1]}
 }
 
-get '/say/*/to/*' && {
-	header "Content-Type" "text/plain"
-	echo Say ${uva[0]} to ${uva[1]}
-}
-
-get "/redirect" && {
+GET "/redirect" && {
 	status 302
 	header "Location" "https://github.com/"
 }
+
+POST "/post/*" && {
+	header "Content-Type" "text/plain"
+	echo "Path: $PATH_INFO"
+	echo "Query: $QUERY_STRING"
+	echo "Data: $POST_DATA"
+}
+
+

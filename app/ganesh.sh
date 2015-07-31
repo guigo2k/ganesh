@@ -13,7 +13,7 @@ declare RESPONSE_CHARSET='utf-8'
 declare RESPONSE_STATUS='200 OK'
 declare RESPONSE_DATE="$(date -u '+%a, %d %b %Y %R:%S GMT')"
 
-declare -a uva
+declare -a uvi
 
 # public functions
 # ---------------------------------------------------------------------------------
@@ -41,10 +41,10 @@ ganesh_route() {
     local re=$(ganesh_compile_path "$path")
     local -i i
 
-    uva=()
+    uvi=()
     if [ "$REQUEST_METHOD" = "$verb" ] && [[ "$REQUEST_URI_PATH" =~ $re ]]; then
 		for ((i = 1; i < ${#BASH_REMATCH[@]}; i++)) {
-		    uva[i - 1]=$(uri_unescape "${BASH_REMATCH[i]}")
+		    uvi[i - 1]=$(uri_unescape "${BASH_REMATCH[i]}")
 		}
 		routing_matched=true
 		return 0
@@ -70,11 +70,10 @@ ganesh_compile_path() {
 ganesh_extract_params() {
     local query=${REQUEST_URI_PARAM#*\?}
     if [ "$REQUEST_METHOD" = POST ] && [[ -n "$CONTENT_LENGTH" ]]; then
-		local str
-		IFS='' read -r -n "$CONTENT_LENGTH" str
+		read -n $CONTENT_LENGTH POST_DATA
 		if [ -n "$query" ]
-		then query="$query&$str"
-		else query=$str
+		then query="$query&$POST_DATA"
+		else query=$POST_DATA
 		fi
     fi
 
