@@ -11,7 +11,7 @@
 
 ## A Sinatra-like CGI framework for Bash
 
-Ganesh is a framework for writing micro-services using shell scripts. It builds on [Docker](https://www.docker.com/) and [uWSGI](https://github.com/unbit/uwsgi) application server for deploying self-contained, unprivileged bash applications. 
+Ganesh is a framework for writing micro-services using shell scripts. It builds on [Docker](https://www.docker.com/) and the [uWSGI](https://github.com/unbit/uwsgi) app server for deploying self-contained, unprivileged bash applications. 
 
 ### Quick start
 
@@ -50,8 +50,10 @@ get "/redirect" && {
     
 ```
 
-### Note
+### Notes
 
-By default, applications do not have access to the host system. You can --link your app to other containers or mount specific directories from your host system using Docker volumes.
+Nginx natively supports upstream servers speaking the uwsgi protocol. See [uWSGI docs](http://uwsgi-docs.readthedocs.org/en/latest/Nginx.html).
 
-For more information visit the [Docker Docs](https://docs.docker.com/).
+By default, applications do not have access to the host system. You can --link your app to other containers or mount specific directories from your host  using Docker volumes.
+
+For more information visit the [Docker docs](https://docs.docker.com/).
