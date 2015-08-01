@@ -10,8 +10,14 @@ WORKDIR /app
 USER ganesh
 EXPOSE 8080
 CMD uwsgi \
+--master \
+--pcre-jit \
+--threads 5 \
+--processes 2 \
+--thunder-lock \
+--lock-engine ipcsem \
 --http-socket :8080 \
 --http-socket-modifier1 9 \
 --plugin-dir /usr/lib/uwsgi \
---plugin cgi \
+--plugins cgi \
 --cgi app.sh
