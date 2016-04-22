@@ -1,6 +1,6 @@
 FROM alpine:3.3
 
-ADD . /app
+ADD app /app
 WORKDIR /app
 
 RUN apk --update add bash curl grep uwsgi-cgi && \
