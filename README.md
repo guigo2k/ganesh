@@ -9,20 +9,20 @@
                                   
 ```                                                  
 
-## A Sinatra-like CGI framework for Bash
+## A web framework for Bash
 
-Ganesh is a framework for writing micro-services using shell scripts. It builds on [Docker](https://www.docker.com/) and the [uWSGI](https://github.com/unbit/uwsgi) app server for deploying self-contained, unprivileged bash applications. 
+Ganesh is a framework for writing web applications using Bash. It builds on [Docker](https://www.docker.com/) and the [uWSGI](https://github.com/unbit/uwsgi) app server for deploying self-contained, unprivileged bash applications.
 
 ### Quick start
 
 ```
-docker run -p 8080:8080 -it tropicloud/ganesh
+docker run -p 9090:9090 -it tropicloud/ganesh
 ```
 
-Now visit http://localhost:8080/ or run the following in your terminal:
+Now visit http://localhost:9090/ or run the following in your terminal:
 
 ```
-curl -i -X POST "http://localhost:8080/post/path?app=my-app" \
+curl -i -X POST "http://localhost:9090/post/path?app=my-app" \
 -H "Content-Type: application/json" \
 -d '{"name": "my-name", "age": "my-age"}'
 ```
