@@ -118,9 +118,7 @@ ganesh_header() {
 ganesh_response() {
   if [[ -n "$route_match" ]]; then
     ganesh_header
-  	while read -r splendido
-  	do echo "$splendido"
-  	done < $response_file
+    cat $response_file
   else ganesh_false
   fi >&5
 }
