@@ -1,5 +1,9 @@
+# ---------------------------------------------------------------------------------
 # A simple REST framework for Bash.
-# Version 0.3.6
+# ---------------------------------------------------------------------------------
+# Author: Guigo2k <guigo2k@guigo2k.com>
+# Version: 0.3.6
+# ---------------------------------------------------------------------------------
 
 declare gnsh_version=0.3.6
 declare route_match
@@ -36,13 +40,14 @@ gnsh_route() {
 
   local verb="$1"
   local path="$2"
-  local regx="$(gnsh_escape "$path")"
   local -i i
 
-  if [[ "$REQUEST_METHOD" = "$verb" ]] && [[ "$PATH_INFO" =~ $regx ]]; then
-  	route_match=true
-  	gnsh_data
-  	return 0
+  if [[ "$REQUEST_METHOD" = "$verb" ]]; then
+    if [[ "$PATH_INFO" =~ $(gnsh_escape "$path") ]]; then
+    	route_match='true'
+    	gnsh_data
+    	return 0
+    fi
   fi
   return -1
 }
@@ -51,7 +56,7 @@ gnsh_route() {
 # ---------------------------------------------------------------------------------
 
 gnsh_data() {
-  groups=( $(echo $path | grep -o -e ':\w\+' | cut -d: -f2) )
+  groups=($(echo $path | grep -o -e ':\w\+' | cut -d: -f2))
 
   if [[ -n $groups ]]; then
     for ((i = 1; i < ${#BASH_REMATCH[@]}; i++)); do
@@ -77,7 +82,6 @@ gnsh_data() {
 
 gnsh_escape() {
   local path=$1
-
   path=$(echo $path \
   | sed 's/\./\\./g' \
   | sed 's/+/\+/g' \
@@ -91,7 +95,6 @@ gnsh_escape() {
 
 gnsh_unescape() {
   local str=$1
-
   str=${str//+/ }
   str=${str//%/\\x}
   echo -e "$str"
@@ -101,14 +104,13 @@ gnsh_unescape() {
 # ---------------------------------------------------------------------------------
 
 gnsh_header() {
-
   [[ ! $(echo $res_header | grep 'Status') ]] && header 'Status' "$res_status"
-  [[ ! $(echo $res_header | grep 'Status') ]] && header 'Status' "$res_status"
+  [[ ! $(echo $res_header | grep 'Content-Type') ]] && header 'Content-Type' "$res_type"
 
   header 'Cache-control' 'no-cache'
   header 'Connection' 'keep-alive'
+  header 'Content-Length' "$(cat $res_file | wc -c)"
   header 'Date' "$(date -u '+%a, %d %b %Y %R:%S GMT')"
-  # header 'Content-Length' "$(cat $res_file | wc -c)"
 
   echo -e "$res_header\r\n"
 }
