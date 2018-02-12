@@ -7,20 +7,20 @@
 
 declare gnsh_version=0.3.6
 declare route_match
-declare res_header
-declare res_status='200 OK'
-declare res_type='application/json'
-declare res_file="$(mktemp)"
+declare resp_header
+declare resp_status='200 OK'
+declare resp_type='application/json'
+declare resp_file="$(mktemp)"
 
 # Header
 # ---------------------------------------------------------------------------------
 
-status() { res_status=$1; }
+status() { resp_status=$1; }
 header() { head="$1: $2"
 
-  if [[ "$res_header" ]]
-  then res_header="$res_header\n$head"
-  else res_header="$head"
+  if [[ "$resp_header" ]]
+  then resp_header="$resp_header\n$head"
+  else resp_header="$head"
   fi
 }
 
@@ -104,27 +104,32 @@ gnsh_unescape() {
 # ---------------------------------------------------------------------------------
 
 gnsh_header() {
-  [[ ! $(echo $res_header | grep 'Status') ]] && header 'Status' "$res_status"
-  [[ ! $(echo $res_header | grep 'Content-Type') ]] && header 'Content-Type' "$res_type"
+  [[ ! $(echo $resp_header | grep 'Status') ]] && header 'Status' "$resp_status"
+  [[ ! $(echo $resp_header | grep 'Content-Type') ]] && header 'Content-Type' "$resp_type"
 
   header 'Cache-control' 'no-cache'
   header 'Connection' 'keep-alive'
-  header 'Content-Length' "$(cat $res_file | wc -c)"
+  header 'Content-Length' "$(cat $resp_file | wc -c)"
   header 'Date' "$(date -u '+%a, %d %b %Y %R:%S GMT')"
 
-  echo -e "$res_header\r\n"
+  echo -e "$resp_header\r\n"
 }
 
-# Reponse
+# Auth.
 # ---------------------------------------------------------------------------------
+gnsh_auth() {
+  http_auth=$(echo $HTTP_AUTHORIZATION | cut -d' ' -f2)
 
-gnsh_response() {
-  if [[ -n "$route_match" ]]; then
+  if [[ "$http_auth" != "$token" ]]; then
+    status 401
     gnsh_header
-    cat $res_file
-  else
-    gnsh_false
-  fi >&5
+    cat <<EOF
+{
+  "code": 401,
+  "message": "Unauthorized"
+}
+EOF
+  fi
 }
 
 # Not found (404)
@@ -141,10 +146,23 @@ gnsh_false() {
 EOF
 }
 
+# Reponse
+# ---------------------------------------------------------------------------------
+
+gnsh_response() {
+  [[ -n "$token" ]] && gnsh_auth
+  if [[ -n "$route_match" ]]; then
+    gnsh_header
+    cat $resp_file
+  else
+    gnsh_false
+  fi >&5
+}
+
 # Send Response!
 # ---------------------------------------------------------------------------------
 
-trap 'gnsh_response; rm -f $res_file' EXIT
-: > $res_file
+trap 'gnsh_response; rm -f $resp_file' EXIT
+: > $resp_file
 exec 5>&1
-exec > $res_file
+exec > $resp_file
