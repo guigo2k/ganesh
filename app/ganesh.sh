@@ -119,29 +119,24 @@ gnsh_header() {
 # ---------------------------------------------------------------------------------
 gnsh_auth() {
   http_auth=$(echo $HTTP_AUTHORIZATION | cut -d' ' -f2)
-
   if [[ "$http_auth" != "$token" ]]; then
-    status 401
-    gnsh_header
-    cat <<EOF
-{
-  "code": 401,
-  "message": "Unauthorized"
-}
-EOF
+    gnsh_error 401 "Unauthorized"
   fi
 }
 
-# Not found (404)
+# Error
 # ---------------------------------------------------------------------------------
 
-gnsh_false() {
-  status 404
+gnsh_error() {
+  local code=$1
+  local msg=$2
+
+  status $code
   gnsh_header
   cat <<EOF
 {
-  "code": 404,
-  "message": "Not Found"
+  "code": $code,
+  "message": "$msg"
 }
 EOF
 }
@@ -155,7 +150,7 @@ gnsh_response() {
     gnsh_header
     cat $resp_file
   else
-    gnsh_false
+    gnsh_error 404 "Not Found"
   fi >&5
 }
 
