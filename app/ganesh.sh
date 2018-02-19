@@ -10,29 +10,128 @@ declare route_match
 declare resp_header
 declare resp_status='200 OK'
 declare resp_type='application/json'
-declare resp_file="$(mktemp)"
+declare resp_file="$(mktemp /tmp/gnsh.XXXXXXX)"
 
-# Header
+# http verbs
 # ---------------------------------------------------------------------------------
 
-status() { resp_status=$1; }
+   get() { gnsh_route GET "$1"; }
+   put() { gnsh_route PUT "$1"; }
+  post() { gnsh_route POST "$1"; }
+delete() { gnsh_route DELETE "$1"; }
+
+# http headers
+# ---------------------------------------------------------------------------------
+
+status() { resp_status="$1"; }
 header() { head="$1: $2"
 
   if [[ "$resp_header" ]]
-  then resp_header="$resp_header\n$head"
+  then resp_header="${resp_header}\n${head}"
   else resp_header="$head"
   fi
 }
 
-# Verbs
+# http header
 # ---------------------------------------------------------------------------------
 
-   get() { gnsh_route GET $1; }
-   put() { gnsh_route PUT $1; }
-  post() { gnsh_route POST $1; }
-delete() { gnsh_route DELETE $1; }
+gnsh_header() {
+  [[ ! $(echo "$resp_header" | grep 'Status') ]] && header "Status" "$resp_status"
+  [[ ! $(echo "$resp_header" | grep 'Content-Type') ]] && header "Content-Type" "$resp_type"
+  header "Cache-control" "no-cache"
+  header "Connection" "keep-alive"
+  header "Date" "$(date -u '+%a, %d %b %Y %R:%S GMT')"
+  echo -e "$resp_header\r\n"
+}
 
-# Router
+# http error
+# ---------------------------------------------------------------------------------
+
+gnsh_error() {
+  local msg
+  local code="$1"
+  case "$code" in
+    401 ) msg="Unauthorized" ;;
+    404 ) msg="Not Found" ;;
+  esac
+  cat <<EOF
+{
+  "code": $code,
+  "message": "$msg"
+}
+EOF
+}
+
+# http auth.
+# ---------------------------------------------------------------------------------
+gnsh_auth() {
+  local http_token="$1"
+  local http_auth=$(echo "$HTTP_AUTHORIZATION" | cut -d' ' -f2)
+  if [[ "$http_auth" != "$http_token" ]]; then
+    route_match="true"
+    status 401
+    gnsh_error 401
+  fi
+}
+
+# escape func.
+# ---------------------------------------------------------------------------------
+
+gnsh_escape() {
+  local path="$1"
+  path=$(echo "$path" \
+  | sed 's/\./\\./g' \
+  | sed 's/+/\+/g' \
+  | sed 's/\*/(.*?)/g' \
+  | sed -E 's/:(\w*)/(.*?)/g')
+  echo "^$path\$"
+}
+
+# unescape func.
+# ---------------------------------------------------------------------------------
+
+gnsh_unescape() {
+  local str="$1"
+  str="${str//+/ }"
+  str="${str//%/\\x}"
+  echo -e "$str"
+}
+
+# url params
+# ---------------------------------------------------------------------------------
+
+gnsh_params() {
+  params=($(echo "$path" | grep -o -e ':\w\+' | cut -d: -f2))
+  if [[ -n $params ]]; then
+    for ((i = 1; i < ${#BASH_REMATCH[@]}; i++)); do
+      export "${params[i - 1]}=$(gnsh_unescape "${BASH_REMATCH[i]}")"
+    done
+  fi
+}
+
+# query string
+# ---------------------------------------------------------------------------------
+
+gnsh_query() {
+  if [[ -n "$QUERY_STRING" ]]; then
+    for var in $(echo "$QUERY_STRING" | tr '&' '\n'); do
+      key=$(echo $var | cut -d= -f1)
+      val=$(echo $var | cut -d= -f2)
+      export "${key}=${val}"
+    done
+  fi
+}
+
+# http data (payload)
+# ---------------------------------------------------------------------------------
+
+gnsh_data() {
+  if [[ -n "$CONTENT_LENGTH" ]]; then
+    read -n "$CONTENT_LENGTH" http_data
+	fi
+}
+
+# http routes
 # ---------------------------------------------------------------------------------
 
 gnsh_route() {
@@ -44,7 +143,9 @@ gnsh_route() {
 
   if [[ "$REQUEST_METHOD" = "$verb" ]]; then
     if [[ "$PATH_INFO" =~ $(gnsh_escape "$path") ]]; then
-    	route_match='true'
+    	route_match="true"
+      gnsh_params
+      gnsh_query
     	gnsh_data
     	return 0
     fi
@@ -52,115 +153,24 @@ gnsh_route() {
   return -1
 }
 
-# Post Data / Query String
-# ---------------------------------------------------------------------------------
-
-gnsh_data() {
-  groups=($(echo $path | grep -o -e ':\w\+' | cut -d: -f2))
-
-  if [[ -n $groups ]]; then
-    for ((i = 1; i < ${#BASH_REMATCH[@]}; i++)); do
-      export "${groups[i - 1]}=$(gnsh_unescape "${BASH_REMATCH[i]}")"
-    done
-  fi
-
-  if [[ -n $QUERY_STRING ]]; then
-    for var in $(echo $QUERY_STRING | tr '&' '\n'); do
-      key=$(echo $var | cut -d= -f1)
-      val=$(echo $var | cut -d= -f2)
-      export "${key}=${val}"
-    done
-  fi
-
-  if [[ -n "$CONTENT_LENGTH" ]]; then
-    read -n $CONTENT_LENGTH DATA
-	fi
-}
-
-# Escape path (for regex match)
-# ---------------------------------------------------------------------------------
-
-gnsh_escape() {
-  local path=$1
-  path=$(echo $path \
-  | sed 's/\./\\./g' \
-  | sed 's/+/\+/g' \
-  | sed 's/\*/(.*?)/g' \
-  | sed -E 's/:(\w*)/(.*?)/g')
-  echo "^$path\$"
-}
-
-# Unescape
-# ---------------------------------------------------------------------------------
-
-gnsh_unescape() {
-  local str=$1
-  str=${str//+/ }
-  str=${str//%/\\x}
-  echo -e "$str"
-}
-
-# Headers
-# ---------------------------------------------------------------------------------
-
-gnsh_header() {
-  [[ ! $(echo $resp_header | grep 'Status') ]] && header 'Status' "$resp_status"
-  [[ ! $(echo $resp_header | grep 'Content-Type') ]] && header 'Content-Type' "$resp_type"
-
-  header 'Cache-control' 'no-cache'
-  header 'Connection' 'keep-alive'
-  header 'Content-Length' "$(cat $resp_file | wc -c)"
-  header 'Date' "$(date -u '+%a, %d %b %Y %R:%S GMT')"
-
-  echo -e "$resp_header\r\n"
-}
-
-# Auth.
-# ---------------------------------------------------------------------------------
-gnsh_auth() {
-  http_auth=$(echo $HTTP_AUTHORIZATION | cut -d' ' -f2)
-  if [[ "$http_auth" != "$token" ]]; then
-    gnsh_error '401'
-  fi
-}
-
-# Error
-# ---------------------------------------------------------------------------------
-
-gnsh_error() {
-  local code=$1
-  case $code in
-    401 ) local msg="Unauthorized" ;;
-    404 ) local msg="Not Found" ;;
-  esac
-
-  status $code
-  gnsh_header
-  cat <<EOF
-{
-  "code": $code,
-  "message": "$msg"
-}
-EOF
-}
-
-# Reponse
+# http reponse
 # ---------------------------------------------------------------------------------
 
 gnsh_response() {
-  [[ -n "$token" ]] && gnsh_auth
   if [[ -n "$route_match" ]]; then
     gnsh_header
-    cat $resp_file
+    cat "$resp_file"
   else
-    gnsh_error '404'
+    status 404
+    gnsh_header
+    gnsh_error 404
   fi >&5
 }
 
-# Send Response!
+# and... go!
 # ---------------------------------------------------------------------------------
 
 trap 'gnsh_response; rm -f $resp_file' EXIT
-: > $resp_file
+: > "$resp_file"
 exec 5>&1
-exec > $resp_file
+exec > "$resp_file"
