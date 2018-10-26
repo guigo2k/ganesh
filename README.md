@@ -13,6 +13,10 @@
 
 Ganesh is a framework for writing web applications using Bash. It builds on [Docker](https://www.docker.com/) and the [uWSGI](https://github.com/unbit/uwsgi) app server for deploying self-contained, unprivileged bash applications.
 
+### Requirements
+* [Docker](https://www.docker.com/)
+* [docker-compose](https://github.com/docker/compose/)
+
 ### Quick start
 
 ```
@@ -28,10 +32,6 @@ curl -i -X POST "http://localhost:9000/user" \
 ```
 
 For more examples, check the [example app](https://github.com/tropicloud/ganesh/tree/master/app).
-
-### Requirements
-* [Docker](https://www.docker.com/)
-* [docker-compose](https://github.com/docker/compose/)
 
 ### Example App
 
