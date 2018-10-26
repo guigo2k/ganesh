@@ -1,0 +1,14 @@
+version: "2"
+services:
+  mongo:
+    image: "mongo"
+    volumes:
+      - ./data:/data
+    ports:
+      - "27017"
+  app:
+    image: "tropicloud/ganesh:3.6"
+    volumes:
+      - ./app:/app
+    ports:
+      - "9000:9000"
