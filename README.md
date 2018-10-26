@@ -14,14 +14,18 @@
 Ganesh is a framework for writing web applications using Bash. It builds on [Docker](https://www.docker.com/) and the [uWSGI](https://github.com/unbit/uwsgi) app server for deploying self-contained, unprivileged bash applications.
 
 ### Requirements
+
 * [Docker](https://www.docker.com/)
-* [docker-compose](https://github.com/docker/compose/)
 
-### Quick start
+### Quick Start
 
+Start database and app containers:
 ```
-docker-compose up
+docker run -d --rm --name mongo -p 27017:27017 mongo
+docker run -d --rm --link mongo:mongo -p 9000:9000 tropicloud/ganesh:3.6
 ```
+
+>Alternatively, you can use [docker-compose](https://github.com/docker/compose/) to start the containers.
 
 Now run the following:
 
