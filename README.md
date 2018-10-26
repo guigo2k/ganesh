@@ -46,7 +46,7 @@ gnsh_auth "$token"
 
 # db conn.
 db() {
-	mongo --quiet --host "mongo" --eval "$@"
+  mongo --quiet --host "mongo" --eval "$@"
 }
 
 put  '/user/:uuid/friends' && put_user_friends
