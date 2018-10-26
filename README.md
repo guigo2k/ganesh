@@ -23,7 +23,7 @@ Ganesh is a framework for writing web applications using Bash. It builds on [Doc
 docker-compose up
 ```
 
-Now run the following in your terminal:
+Now run the following:
 
 ```bash
 curl -i -X POST "http://localhost:9000/user" \
