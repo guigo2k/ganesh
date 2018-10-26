@@ -11,21 +11,15 @@
 
 ## A simple REST framework for Bash
 
-Ganesh is a framework for writing web applications using Bash. It builds on [Docker](https://www.docker.com/) and the [uWSGI](https://github.com/unbit/uwsgi) app server for deploying self-contained, unprivileged bash applications.
-
-### Requirements
-
-* [Docker](https://www.docker.com/)
+Ganesh is a framework for writing web applications using Bash. It builds on [Docker](https://www.docker.com/) and the [uWSGI](https://github.com/unbit/uwsgi) app server for deploying self-contained, unprivileged Bash applications.
 
 ### Quick Start
 
-Start database and app containers:
+Start the database and app containers:
 ```
 docker run -d --rm --name mongo -p 27017:27017 mongo
 docker run -d --rm --link mongo:mongo -p 9000:9000 tropicloud/ganesh:3.6
 ```
-
->Alternatively, you can use [docker-compose](https://github.com/docker/compose/) to start the containers.
 
 Now run the following:
 
@@ -77,7 +71,8 @@ db.user.find(
 EOF
 
   db "$user" | jq .
-}```
+}
+```
 
 ### Notes
 
