@@ -1,0 +1,9 @@
+# General #
+###################
+*.txt
+.bash*
+.mongo*
+.db*
+.env
+/db
+/data

@@ -1,24 +1,20 @@
 #!/bin/bash
 
 . ganesh.sh
+. user.sh
 
-get '/' && {
-	header 'Content-Type' 'text/html'
-	cat ./www/index.html
+# http auth.
+gnsh_auth "$token"
+
+# db conn.
+db() {
+	mongo --quiet --host "mongo" --eval "$@"
 }
 
-get '/say/:word/to/:name' && {
-	echo "Say $word to $name"
-}
-
-get '/redirect' && {
-	status 302
-	header 'Location' 'https://github.com/'
-}
-
-get '/env' && { printenv; }
-
-post '/post/*' && {
-	echo $QUERY_STRING | sed 's/&/\n/g'
-	echo $REQUEST_BODY | sed 's/&/\n/g'
-}
+put  '/user/:uuid/friends' && put_user_friends
+get  '/user/:uuid/friends' && get_user_friends
+put  '/user/:uuid/state'   && put_user_state
+get  '/user/:uuid/state'   && get_user_state
+get  '/user/:uuid'         && get_user_id
+post '/user'               && post_user
+get  '/user'               && get_user

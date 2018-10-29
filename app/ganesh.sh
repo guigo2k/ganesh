@@ -1,143 +1,176 @@
+# ---------------------------------------------------------------------------------
 # A simple REST framework for Bash.
-# Version 0.3.3
-
-declare ganesh_version=0.3.3
-
-declare route_match
-declare response_headers
-declare response_status='200 OK'
-declare response_type='text/plain'
-declare response_file="/tmp/ganesh.$RANDOM$$"
-
-# Header
+# ---------------------------------------------------------------------------------
+# Author: Guigo2k <guigo2k@guigo2k.com>
+# Version: 0.3.6
 # ---------------------------------------------------------------------------------
 
-status() { response_status=$1; }
+declare gnsh_version=0.3.6
+declare route_match
+declare resp_header
+declare resp_status='200 OK'
+declare resp_type='application/json'
+declare resp_file="$(mktemp /tmp/gnsh.XXXXXXX)"
+
+# http verbs
+# ---------------------------------------------------------------------------------
+
+   get() { gnsh_route GET "$1"; }
+   put() { gnsh_route PUT "$1"; }
+  post() { gnsh_route POST "$1"; }
+delete() { gnsh_route DELETE "$1"; }
+
+# http headers
+# ---------------------------------------------------------------------------------
+
+status() { resp_status="$1"; }
 header() { head="$1: $2"
 
-  if [[ "$response_headers" ]]
-  then response_headers="$response_headers\n$head"
-  else response_headers="$head"
+  if [[ "$resp_header" ]]
+  then resp_header="${resp_header}\n${head}"
+  else resp_header="$head"
   fi
 }
 
-# Verbs
+# http header
 # ---------------------------------------------------------------------------------
 
-   get() { ganesh_route GET $1; }
-   put() { ganesh_route PUT $1; }
-  post() { ganesh_route POST $1; }
-delete() { ganesh_route DELETE $1; }
-
-# Router
-# ---------------------------------------------------------------------------------
-
-ganesh_route() {
-  [[ -n "$route_match" ]] && return -1
-
-  local verb="$1"
-  local path="$2"
-  local regx="$(ganesh_escape "$path")"
-  local -i i
-
-  if [[ "$REQUEST_METHOD" = "$verb" ]] && [[ "$PATH_INFO" =~ $regx ]]; then
-  	route_match=true
-  	ganesh_data
-  	return 0
-  fi
-  return -1
+gnsh_header() {
+  [[ ! $(echo "$resp_header" | grep 'Status') ]] && header "Status" "$resp_status"
+  [[ ! $(echo "$resp_header" | grep 'Content-Type') ]] && header "Content-Type" "$resp_type"
+  header "Cache-control" "no-cache"
+  header "Connection" "keep-alive"
+  header "Date" "$(date -u '+%a, %d %b %Y %R:%S GMT')"
+  echo -e "$resp_header\r\n"
 }
 
-# Post Data / Query String
+# http error
 # ---------------------------------------------------------------------------------
 
-ganesh_data() {
-  groups=( $(echo $path | grep -o -e ':\w\+' | cut -d: -f2) )
-  if [[ -n $groups ]]; then
+gnsh_error() {
+  local msg
+  local code="$1"
+  case "$code" in
+    401 ) msg="Unauthorized" ;;
+    404 ) msg="Not Found" ;;
+  esac
+  cat <<EOF
+{
+  "code": $code,
+  "message": "$msg"
+}
+EOF
+}
+
+# http auth.
+# ---------------------------------------------------------------------------------
+gnsh_auth() {
+  local http_token="$1"
+  local http_auth=$(echo "$HTTP_AUTHORIZATION" | cut -d' ' -f2)
+  if [[ "$http_auth" != "$http_token" ]]; then
+    route_match="true"
+    status 401
+    gnsh_error 401
+  fi
+}
+
+# escape func.
+# ---------------------------------------------------------------------------------
+
+gnsh_escape() {
+  local path="$1"
+  path=$(echo "$path" \
+  | sed 's/\./\\./g' \
+  | sed 's/+/\+/g' \
+  | sed 's/\*/(.*?)/g' \
+  | sed -E 's/:(\w*)/(.*?)/g')
+  echo "^$path\$"
+}
+
+# unescape func.
+# ---------------------------------------------------------------------------------
+
+gnsh_unescape() {
+  local str="$1"
+  str="${str//+/ }"
+  str="${str//%/\\x}"
+  echo -e "$str"
+}
+
+# url params
+# ---------------------------------------------------------------------------------
+
+gnsh_params() {
+  params=($(echo "$path" | grep -o -e ':\w\+' | cut -d: -f2))
+  if [[ -n $params ]]; then
     for ((i = 1; i < ${#BASH_REMATCH[@]}; i++)); do
-      export "${groups[i - 1]}=$(ganesh_unescape "${BASH_REMATCH[i]}")"
+      export "${params[i - 1]}=$(gnsh_unescape "${BASH_REMATCH[i]}")"
     done
   fi
-  if [[ -n $QUERY_STRING ]]; then
-    for var in $(echo $QUERY_STRING | tr '&' '\n'); do
+}
+
+# query string
+# ---------------------------------------------------------------------------------
+
+gnsh_query() {
+  if [[ -n "$QUERY_STRING" ]]; then
+    for var in $(echo "$QUERY_STRING" | tr '&' '\n'); do
       key=$(echo $var | cut -d= -f1)
       val=$(echo $var | cut -d= -f2)
       export "${key}=${val}"
     done
   fi
+}
+
+# http data (payload)
+# ---------------------------------------------------------------------------------
+
+gnsh_data() {
   if [[ -n "$CONTENT_LENGTH" ]]; then
-    read -n $CONTENT_LENGTH REQUEST_BODY
+    read -n "$CONTENT_LENGTH" http_data
 	fi
 }
 
-# Escape path (for regex match)
+# http routes
 # ---------------------------------------------------------------------------------
 
-ganesh_escape() {
-  local path=$1
-  path=$(echo $path \
-| sed 's/\./\\./g' \
-| sed 's/\+/\\+/g' \
-| sed 's/\*/(.*?)/g' \
-| sed -E 's/:(\w*)/(.*?)/g')
-  echo "^$path\$"
-}
+gnsh_route() {
+  [[ -n "$route_match" ]] && return -1
 
-# Unescape
-# ---------------------------------------------------------------------------------
+  local verb="$1"
+  local path="$2"
+  local -i i
 
-ganesh_unescape() {
-  local str=$1
-  str=${str//+/ }
-  str=${str//%/\\x}
-  echo -e "$str"
-}
-
-# Headers
-# ---------------------------------------------------------------------------------
-
-ganesh_header() {
-  if [[ ! $(echo $response_headers | grep 'Status') ]]; then
-    header 'Status' "$response_status"
+  if [[ "$REQUEST_METHOD" = "$verb" ]]; then
+    if [[ "$PATH_INFO" =~ $(gnsh_escape "$path") ]]; then
+    	route_match="true"
+      gnsh_params
+      gnsh_query
+    	gnsh_data
+    	return 0
+    fi
   fi
-  if [[ ! $(echo $response_headers | grep 'Content-Type') ]]; then
-    header 'Content-Type' "$response_type"
-  fi
-  # if [[ ! $(echo $response_headers | grep 'text/html') ]]; then
-  #   header 'Content-Length' "$(cat $response_file | wc -c)"
-  # fi
-  header 'Cache-control' 'no-cache'
-  header 'Connection' 'keep-alive'
-  header 'Date' "$(date -u '+%a, %d %b %Y %R:%S GMT')"
-  echo -e "$response_headers\r\n"
+  return -1
 }
 
-# Reponse
+# http reponse
 # ---------------------------------------------------------------------------------
 
-ganesh_response() {
+gnsh_response() {
   if [[ -n "$route_match" ]]; then
-    ganesh_header
-    cat $response_file
-  else ganesh_false
+    gnsh_header
+    cat "$resp_file"
+  else
+    status 404
+    gnsh_header
+    gnsh_error 404
   fi >&5
 }
 
-# Not found (404)
+# and... go!
 # ---------------------------------------------------------------------------------
 
-ganesh_false() {
-  header 'Content-Type' 'text/html'
-  ganesh_header
-  # cat ./www/404.html
-	echo "<center><h1>404 Not found</h1>"
-  echo "Ganesh $ganesh_version</center>"
-}
-
-# Done!
-# ---------------------------------------------------------------------------------
-
-trap 'ganesh_response; rm -f $response_file' EXIT
-: > $response_file
+trap 'gnsh_response; rm -f $resp_file' EXIT
+: > "$resp_file"
 exec 5>&1
-exec > $response_file
+exec > "$resp_file"

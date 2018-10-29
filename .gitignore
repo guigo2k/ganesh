@@ -1,8 +1,12 @@
-# Text and env. #
+# General #
 ###################
 *.txt
-.ftpconfig
+.bash*
+.mongo*
+.db*
 .env
+/db
+/data
 
 # Compiled source #
 ###################
