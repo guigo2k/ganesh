@@ -1,5 +1,11 @@
 terraform {
   required_version = "~> 0.11.0"
+
+  backend "s3" {
+    bucket = "talabat-bd-eu-west-1-terraform"
+    key    = "drone-demo/ganesh.tfstate"
+    region = "eu-west-1"
+  }
 }
 
 provider "aws" {
@@ -36,12 +42,11 @@ resource "aws_instance" "web" {
     Name = "Ganesh"
   }
 
-
   provisioner "remote-exec" {
     inline = [
       "mkdir -p /opt/bin",
       "curl -L https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m) -o /opt/bin/docker-compose",
-      "chmod +x /opt/bin/docker-compose"
+      "chmod +x /opt/bin/docker-compose",
     ]
   }
 }

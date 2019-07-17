@@ -2,15 +2,16 @@ kind: pipeline
 name: deploy
 
 steps:
-  - name: unit-test
+  - name: terraform
     image: hashicorp/terraform:0.11.14
     environment:
-    AWS_ACCESS_KEY_ID:
-      from_secret: AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY:
-      from_secret: AWS_SECRET_ACCESS_KEY
+      AWS_ACCESS_KEY_ID:
+        from_secret: aws_access_key_id
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: aws_secret_access_key
     commands:
-      - terraform plan
+      - terraform init
+      - terraform apply -auto-approve
     when:
       branch: v4
       event: push
