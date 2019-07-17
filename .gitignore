@@ -30,6 +30,11 @@
 *.tar
 *.zip
 
+# Terraform #
+#############
+.terraform
+.tfstate*
+
 # Logs and databases #
 ######################
 *.log

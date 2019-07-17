@@ -13,7 +13,7 @@
 # }
 
 post_user() {
-  name=$(echo "$http_data" | jq -r '.name')
+  name=$(echo "$payload" | jq -r '.name')
   uuid=$(cat /proc/sys/kernel/random/uuid)
 
   read -r -d '' user <<EOF
@@ -45,8 +45,8 @@ EOF
 # }
 
 put_user_state() {
-  games=$(echo "$http_data" | jq -r '.gamesPlayed')
-  score=$(echo "$http_data" | jq -r '.score')
+  games=$(echo "$payload" | jq -r '.gamesPlayed')
+  score=$(echo "$payload" | jq -r '.score')
 
   read -r -d '' state <<EOF
 var state = db.user.update(
@@ -78,7 +78,7 @@ EOF
 # }
 
 put_user_friends() {
-  friends=$(echo "$http_data" | jq -r '.friends')
+  friends=$(echo "$payload" | jq -r '.friends')
 
   read -r -d '' friends <<EOF
 var friends = db.user.update(

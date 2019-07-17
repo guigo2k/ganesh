@@ -7,8 +7,10 @@ services:
     ports:
       - "27017"
   app:
-    image: "tropicloud/ganesh:3.6"
+    build: .
     volumes:
       - ./app:/app
     ports:
       - "9000:9000"
+    environment:
+      - "token=bea376cb4ed3daad21e16d0bc25bd281"

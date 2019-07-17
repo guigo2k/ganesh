@@ -1,20 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 . ganesh.sh
 . user.sh
 
-# http auth.
-gnsh_auth "$token"
+# http authorization
+http_auth "$token"
 
-# db conn.
-db() {
-	mongo --quiet --host "mongo" --eval "$@"
-}
+# database connection
+db() { mongo --quiet --host mongo --eval "$@"; }
 
-put  '/user/:uuid/friends' && put_user_friends
-get  '/user/:uuid/friends' && get_user_friends
-put  '/user/:uuid/state'   && put_user_state
-get  '/user/:uuid/state'   && get_user_state
-get  '/user/:uuid'         && get_user_id
-post '/user'               && post_user
-get  '/user'               && get_user
+# http routes
+PUT  '/user/:uuid/friends' && put_user_friends
+GET  '/user/:uuid/friends' && get_user_friends
+PUT  '/user/:uuid/state'   && put_user_state
+GET  '/user/:uuid/state'   && get_user_state
+GET  '/user/:uuid'         && get_user_id
+POST '/user'               && post_user
+GET  '/user'               && get_user
