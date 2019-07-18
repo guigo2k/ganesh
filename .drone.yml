@@ -2,16 +2,34 @@ kind: pipeline
 name: deploy
 
 steps:
-  - name: terraform
+  - name: terraform_apply
     image: hashicorp/terraform:0.11.14
     environment:
       AWS_ACCESS_KEY_ID:
         from_secret: aws_access_key_id
       AWS_SECRET_ACCESS_KEY:
         from_secret: aws_secret_access_key
+      SSH_KEY:
+        from_secret: ssh_key
     commands:
+      - echo "$SSH_KEY" > /tmp/ssh_key.pem && chmod 0600 /tmp/ssh_key.pem
+      - eval $(ssh-agent -s) && ssh-add -k /tmp/ssh_key.pem
       - terraform init
       - terraform apply -auto-approve
     when:
       branch: v4
       event: push
+
+  # - name: terraform_destroy
+  #   image: hashicorp/terraform:0.11.14
+  #   environment:
+  #     AWS_ACCESS_KEY_ID:
+  #       from_secret: aws_access_key_id
+  #     AWS_SECRET_ACCESS_KEY:
+  #       from_secret: aws_secret_access_key
+  #   commands:
+  #     - terraform init
+  #     - terraform destroy -force
+  #   when:
+  #     status:
+  #     - failure

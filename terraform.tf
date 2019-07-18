@@ -12,41 +12,61 @@ provider "aws" {
   region = "eu-west-1"
 }
 
-resource "aws_security_group" "allow_ganesh" {
-  name        = "allow_ganesh"
-  description = "Allow HTTP inbound traffic"
+resource "aws_security_group" "ganesh_demo" {
+  name        = "ganesh_demo"
+  description = "Allow HTTP and SSH inbound traffic"
+  vpc_id      = "vpc-0992bae76c415f251"
 
   ingress {
-    # TLS (change to whatever ports you need)
-    from_port = 9000
-    to_port   = 9000
-    protocol  = "tcp"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-    # Please restrict your ingress to only necessary IPs and ports.
-    # Opening to 0.0.0.0/0 can lead to security vulnerabilities.
+  ingress {
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "allow_ganesh"
+    Name = "ganesh_demo"
   }
 }
 
 resource "aws_instance" "web" {
   instance_type          = "t2.micro"
   ami                    = "ami-053d1b6039e1098d4"
-  subnet_id              = "subnet-0a8d31a8431e62240"
-  vpc_security_group_ids = ["${aws_security_group.allow_ganesh.id}"]
+  subnet_id              = "subnet-017552b4697cc7220"
+  key_name               = "infra-dev-eu-west-1-drone"
+  vpc_security_group_ids = ["${aws_security_group.ganesh_demo.id}"]
 
   tags = {
-    Name = "Ganesh"
+    Name = "ganesh_demo"
   }
 
   provisioner "remote-exec" {
+    connection {
+      type = "ssh"
+      user = "core"
+    }
+
     inline = [
-      "mkdir -p /opt/bin",
-      "curl -L https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m) -o /opt/bin/docker-compose",
-      "chmod +x /opt/bin/docker-compose",
+      "sudo mkdir -p /opt/bin",
+      "sudo curl -L https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m) -o /opt/bin/docker-compose",
+      "sudo chmod +x /opt/bin/docker-compose",
+      "git clone https://github.com/guigo2k/ganesh",
+      "cd ganesh && git checkout v4",
+      "docker-compose up",
     ]
   }
 }
